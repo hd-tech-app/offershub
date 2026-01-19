@@ -1,0 +1,7 @@
+{
+  "name": "Offers Hub",
+  "description": "A high-performance Amazon affiliate dashboard featuring live bestseller tracking, AI-powered product updates, and personalized browsing.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
