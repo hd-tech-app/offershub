@@ -242,7 +242,7 @@ const ProductRow: React.FC<ProductRowProps> = ({
               }`}
               title="Filter & Sort"
             >
-              <SlidersHorizontal className="w-4 h-4" />
+              <SlidersHorizontal className="w-5 h-5" />
               <span className="hidden sm:inline text-xs font-bold">Filters</span>
               {hasActiveFilters && (
                 <span className="flex h-2 w-2 rounded-full bg-orange-500"></span>
@@ -255,7 +255,7 @@ const ProductRow: React.FC<ProductRowProps> = ({
               className="flex items-center gap-1.5 p-1.5 sm:px-3 sm:py-1.5 rounded-lg border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm transition-all active:scale-95 hover:text-orange-600 dark:hover:text-orange-400"
               title="View All Products"
             >
-              <ViewIcon className="w-4 h-4" />
+              <ViewIcon className="w-5 h-5" />
               <span className="hidden sm:inline text-xs font-bold">View All</span>
             </button>
 
@@ -263,10 +263,10 @@ const ProductRow: React.FC<ProductRowProps> = ({
 
             <div className="flex gap-1">
               <button onClick={() => scrollByButton('left')} className="p-1.5 rounded-lg bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 hover:text-orange-600 shadow-sm transition-all active:scale-95" aria-label="Scroll Left">
-                <ChevronLeft className="w-4 h-4" />
+                <ChevronLeft className="w-5 h-5" />
               </button>
               <button onClick={() => scrollByButton('right')} className="p-1.5 rounded-lg bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 hover:text-orange-600 shadow-sm transition-all active:scale-95" aria-label="Scroll Right">
-                <ChevronRight className="w-4 h-4" />
+                <ChevronRight className="w-5 h-5" />
               </button>
             </div>
           </div>
