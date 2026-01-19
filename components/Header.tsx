@@ -39,7 +39,7 @@ const Header: React.FC<HeaderProps> = ({
     e.preventDefault();
     performShare({
       title: config.headerTitle,
-      text: `${config.shareMessage}\n\nVisit:\n${window.location.href}`,
+      text: `${config.shareMessage}\n\nVisit:\n`,
       url: window.location.href,
     });
   };
