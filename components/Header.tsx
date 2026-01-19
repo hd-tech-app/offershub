@@ -138,7 +138,7 @@ const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* Center Section: Search Bar - Full Width / Middle */}
-<div className="flex-1 w-full mx-auto pt-[0.9rem] sm:px-2 lg:px-6">
+<div className="flex-1 w-full mx-auto sm:px-2 lg:px-6">
   <form onSubmit={handleSearchSubmit} className="relative group w-full">
     {/* Animated focus border glow */}
     <div className="absolute -inset-0.5 bg-gradient-to-r from-orange-600 via-amber-500 to-pink-600 rounded-full blur-md opacity-0 group-focus-within:opacity-20 transition-opacity duration-500" />
