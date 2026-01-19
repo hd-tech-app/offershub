@@ -74,7 +74,7 @@ const ProductCard: React.FC<ProductCardProps> = React.memo(({
   }, [showTopBadge]);
 
   const currentBadge = BADGE_OPTIONS[badgeIndex];
-  const widthClass = variant === 'grid' ? 'w-full' : 'w-37 sm:w-52';
+  const widthClass = variant === 'grid' ? 'w-full' : 'w-36 sm:w-48';
 
   return (
     <div 
