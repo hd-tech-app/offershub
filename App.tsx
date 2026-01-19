@@ -440,7 +440,7 @@ const App: React.FC = () => {
         <button 
           onClick={() => performShare({ 
             title: config.headerTitle, 
-            text: `${config.shareMessage}\n\nVisit:\n${window.location.href}`,
+            text: `${config.shareMessage}\n\nVisit:\n`,
             url: window.location.href 
           })} 
           className="fixed bottom-6 right-4 p-3 bg-orange-600 hover:bg-orange-700 text-white rounded-full shadow-2xl z-40 transition-transform active:scale-95 border-2 border-white dark:border-gray-800"
