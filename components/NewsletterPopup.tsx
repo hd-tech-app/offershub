@@ -4,7 +4,7 @@ import { X, Mail, Send, Bell, Loader2, CheckCircle2, AlertCircle } from 'lucide-
 import { GOOGLE_SCRIPT_URL } from '../constants';
 
 const STORAGE_KEY = 'offers_hub_newsletter_status';
-const DELAY_MS = 8000; // 8 seconds delay before showing
+const DELAY_MS = 15000; // 15 seconds delay before showing
 const REAPPEAR_DAYS = 2; // Show again after 2 days if dismissed
 
 interface StorageState {
