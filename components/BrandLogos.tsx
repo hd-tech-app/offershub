@@ -1,16 +1,16 @@
 
 import React from 'react';
-import { BRANDS } from '../constants';
 import { getAffiliateUrl } from '../utils';
 import { useConfig } from '../contexts/ConfigContext';
 
 const BrandLogos: React.FC = () => {
+  const { affiliateTag, brands } = useConfig();
+  
   // Duplicate brands for seamless infinite loop
-  const brandsList = [...BRANDS, ...BRANDS];
-  const { affiliateTag } = useConfig();
+  const brandsList = [...brands, ...brands];
 
   return (
-    <section className="relative py-10 bg-gray-50/50 dark:bg-gray-900/30 border-t border-gray-200/50 dark:border-gray-800/50 backdrop-blur-sm overflow-hidden">
+    <section className="relative py-6 bg-gray-50/50 dark:bg-gray-900/30 border-t border-gray-200/50 dark:border-gray-800/50 backdrop-blur-sm overflow-hidden">
       
       {/* Section Header */}
       <div className="flex justify-center mb-8">
@@ -25,7 +25,7 @@ const BrandLogos: React.FC = () => {
 
       <div className="relative w-full group/track">
         <div 
-          className="animate-marquee flex items-center gap-6 pl-6"
+          className="animate-marquee flex items-center gap-4 pl-6"
           style={{ animationDuration: '80s' }}
         >
           {brandsList.map((brand, idx) => (

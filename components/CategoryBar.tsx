@@ -1,6 +1,6 @@
 
 import React, { useRef, useState, useEffect } from 'react';
-import { CATEGORIES, CATEGORY_ICONS } from '../constants';
+import { ALL_ICONS } from '../constants';
 import { getAffiliateUrl } from '../utils';
 import { Zap, Sparkles, Flame } from 'lucide-react';
 import { useConfig } from '../contexts/ConfigContext';
@@ -10,7 +10,7 @@ const CategoryBar: React.FC = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
-  const { affiliateTag } = useConfig();
+  const { affiliateTag, categories } = useConfig();
 
   // Enable horizontal scroll with mouse wheel
   useEffect(() => {
@@ -66,25 +66,31 @@ const CategoryBar: React.FC = () => {
           onMouseMove={handleMouseMove}
           onMouseUp={stopDragging}
           onMouseLeave={stopDragging}
-          className={`flex items-center gap-3 overflow-x-auto no-scrollbar px-4 sm:px-6 py-3 scroll-container select-none ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+          className={`flex items-center gap-3 overflow-x-auto no-scrollbar px-4 sm:px-6 py-2 scroll-container select-none ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
           style={{ scrollBehavior: isDragging ? 'auto' : 'smooth' }}
         >
-          {CATEGORIES.map((cat) => {
-            const Icon = CATEGORY_ICONS[cat.icon];
+          {categories.map((cat, idx) => {
+            // Lookup icon dynamically from ALL_ICONS
+            // 1. Try exact match
+            // 2. Try PascalCase match
+            const exactMatch = ALL_ICONS[cat.icon.trim()];
+            const pascalMatch = ALL_ICONS[cat.icon.trim().charAt(0).toUpperCase() + cat.icon.trim().slice(1)];
+            
+            const Icon = exactMatch || pascalMatch || ALL_ICONS.ChevronRight;
             const badge = getBadge(cat.name);
             
             return (
               <a
-                key={cat.name}
+                key={`${cat.name}-${idx}`}
                 href={getAffiliateUrl(cat.url, affiliateTag)}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={(e) => isDragging && e.preventDefault()}
-                className="group relative flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-full bg-gray-100/50 dark:bg-gray-900 border border-gray-200/50 dark:border-gray-800 hover:bg-black dark:hover:bg-white hover:border-black dark:hover:border-white transition-all duration-300 active:scale-95"
+                className="group relative flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-full bg-gray-150/50 dark:bg-gray-900 border border-gray-200/50 dark:border-gray-800 hover:bg-orange-500 dark:hover:bg-white hover:border-gray dark:hover:border-white transition-all duration-300 active:scale-95"
               >
                 {/* Icon */}
                 {Icon && (
-                  <Icon className={`w-6 h-6 transition-colors duration-300 ${cat.color} group-hover:text-white dark:group-hover:text-black`} />
+                  <Icon className={`w-5 h-5 transition-colors duration-300 ${cat.color} group-hover:text-white dark:group-hover:text-black`} />
                 )}
 
                 {/* Text */}

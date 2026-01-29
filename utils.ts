@@ -1,6 +1,6 @@
 
 import { AFFILIATE_TAG } from './constants';
-import { Product } from './types';
+import { Product } from './constants';
 
 /**
  * Appends affiliate tag to Amazon URLs properly
