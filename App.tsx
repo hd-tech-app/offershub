@@ -16,9 +16,28 @@ const QuickViewModal = React.lazy(() => import('./components/QuickViewModal'));
 const NewsletterPopup = React.lazy(() => import('./components/NewsletterPopup'));
 const SmartMessagePopup = React.lazy(() => import('./components/SmartMessagePopup'));
 const ContactUsPopup = React.lazy(() => import('./components/ContactUsPopup'));
+const InAppBrowserBypass = React.lazy(() => import('./components/InAppBrowserBypass'));
+const OfflinePopup = React.lazy(() => import('./components/OfflinePopup'));
 
 const SHEET_ID = '1qrcB3H48Z-5N9JVThXUfQeIL55eAYcaigZqz5ZKQzD8';
 const SHEET_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`;
+
+// Performance Optimization: Prefetch data immediately before React mounts to minimize TTI (Time to Interactive)
+const prefetchData = () => {
+  if (typeof window === 'undefined') return null;
+  return fetch(`${SHEET_CSV_URL}&t=${Date.now()}`)
+    .then(res => {
+      if (!res.ok) throw new Error('Network response was not ok');
+      return res.text();
+    })
+    .catch(err => {
+      console.warn('Prefetch failed:', err);
+      return null;
+    });
+};
+
+// Initiate prefetch immediately
+const preloadedDataPromise = prefetchData();
 
 const SAMPLE_PRODUCTS: Product[] = [
   {
@@ -154,6 +173,10 @@ const App: React.FC = () => {
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   const [config, setConfig] = useState<AppConfig>(defaultConfig);
 
+  // Performance Optimization: Track last data to avoid unnecessary parsing
+  const lastFetchedData = useRef<string | null>(null);
+  const isFirstLoad = useRef(true);
+
   useEffect(() => {
     const root = document.documentElement;
     if (theme === 'dark') root.classList.add('dark');
@@ -186,9 +209,31 @@ const App: React.FC = () => {
   const fetchSheetData = useCallback(async () => {
     try {
       setFetchError(false);
-      const response = await fetch(`${SHEET_CSV_URL}&t=${Date.now()}`);
-      if (!response.ok) throw new Error(`Fetch failed: ${response.status}`);
-      const text = await response.text();
+      let text: string | null = null;
+      
+      // Use preloaded data only on the very first render
+      if (isFirstLoad.current && preloadedDataPromise) {
+        text = await preloadedDataPromise;
+        isFirstLoad.current = false;
+      }
+      
+      // If preloaded data was not available or already used, fetch fresh
+      if (!text) {
+        const response = await fetch(`${SHEET_CSV_URL}&t=${Date.now()}`);
+        if (!response.ok) throw new Error(`Fetch failed: ${response.status}`);
+        text = await response.text();
+      }
+
+      if (!text) throw new Error("Empty data received");
+      
+      // Optimization: Skip expensive parsing if data hasn't changed
+      if (text === lastFetchedData.current) {
+         setIsLoading(false);
+         setLastUpdated(new Date());
+         return;
+      }
+      lastFetchedData.current = text;
+
       const rows = parseCSV(text);
       if (rows.length < 2) {
         setProducts(SAMPLE_PRODUCTS);
@@ -383,7 +428,7 @@ const App: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [products.length]);
+  }, []); // Empty dependency array as this function is self-contained and uses refs for state
 
   useEffect(() => { 
     fetchSheetData(); 
@@ -401,9 +446,9 @@ const App: React.FC = () => {
           :root { --primary-color: ${primaryColor}; }
           .text-orange-500, .text-orange-600, .dark\\:text-orange-400, .dark\\:text-orange-500, .group:hover .group-hover\\:text-orange-600, .hover\\:text-orange-500:hover, .hover\\:text-orange-600:hover, .dark .group:hover .dark\\:group-hover\\:text-orange-400 { color: ${primaryColor} !important; }
           .bg-orange-500, .bg-orange-600, .hover\\:bg-orange-500:hover, .hover\\:bg-orange-600:hover, .dark\\:bg-orange-600, .dark\\:hover\\:bg-orange-600:hover, .group:hover .group-hover\\:bg-orange-500, .group:hover .group-hover\\:bg-orange-600 { background-color: ${primaryColor} !important; }
-          .border-orange-200, .border-orange-500, .focus-visible\\:ring-orange-500:focus-visible { border-color: ${primaryColor} !important; outline-color: ${primaryColor} !important; }
+          .border-orange-200, .border-orange-500, .hover:shadow-orange-400/15, .focus-visible\\:ring-orange-500:focus-visible { border-color: ${primaryColor} !important; outline-color: ${primaryColor} !important; }
           .fill-orange-500 { fill: ${primaryColor} !important; }
-          .bg-orange-50 { background-color: ${primaryColor}15 !important; } 
+          .bg-orange-50, { background-color: ${primaryColor}15 !important; } 
           .hover\\:bg-orange-50:hover { background-color: ${primaryColor}20 !important; }
           .bg-orange-100 { background-color: ${primaryColor}33 !important; }
           .hover\\:bg-orange-100:hover { background-color: ${primaryColor}40 !important; }
@@ -475,6 +520,10 @@ const App: React.FC = () => {
   return (
     <ConfigProvider value={config}>
       {customThemeStyles}
+      <Suspense fallback={null}>
+         <InAppBrowserBypass />
+         <OfflinePopup />
+      </Suspense>
       <div className="min-h-screen transition-colors duration-300 bg-white dark:bg-gray-950">
         <Header 
           onMenuToggle={onMenuToggle} 
@@ -502,7 +551,8 @@ const App: React.FC = () => {
               favorites={favoritesIds} 
               onToggleFavorite={toggleFavorite} 
               onQuickView={setQuickViewProduct} 
-              isLoading={isLoading} 
+              isLoading={isLoading}
+              isPriority={true} // Priority loading for above-the-fold content
             />
           </div>
           {secondRowProducts.length > 0 && (

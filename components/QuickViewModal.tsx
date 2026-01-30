@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { X, Star, Share2, Heart, ArrowRight, StarHalf, CheckCircle2 } from 'lucide-react';
 import { Product, ALL_ICONS } from '../constants';
 import { getAffiliateUrl, formatPrice, shareProduct, fixAmazonThumbnail } from '../utils';
@@ -14,6 +14,7 @@ interface QuickViewModalProps {
 
 const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, onClose, isFavorite, onToggleFavorite }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
   const config = useConfig();
   const qv = config.quickView;
   const modalRef = useRef<HTMLDivElement>(null);
@@ -21,9 +22,10 @@ const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, onClose, isFav
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
   
-  // Focus management
+  // Reset closing state when product changes
   useEffect(() => {
     if (product) {
+      setIsClosing(false);
       setImageLoaded(false);
       setTimeout(() => {
         closeButtonRef.current?.focus();
@@ -31,9 +33,18 @@ const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, onClose, isFav
     }
   }, [product]);
 
+  const handleClose = useCallback(() => {
+    setIsClosing(true);
+    setTimeout(() => {
+      onClose();
+      // We don't need to reset isClosing to false here because the component will unmount
+      // or product will become null, triggering the useEffect above if it remounts.
+    }, 200);
+  }, [onClose]);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') handleClose();
       if (e.key === 'Tab' && modalRef.current) {
         const focusables = modalRef.current.querySelectorAll('button, [href], input, [tabindex]:not([tabindex="-1"])');
         const firstElement = focusables[0] as HTMLElement;
@@ -61,7 +72,7 @@ const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, onClose, isFav
       window.removeEventListener('keydown', handleKeyDown);
       document.body.style.overflow = '';
     };
-  }, [product, onClose]);
+  }, [product, handleClose]);
   
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartRef.current = {
@@ -84,10 +95,10 @@ const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, onClose, isFav
     const scrollPos = scrollContainerRef.current?.scrollTop || 0;
 
     if (isHorizontalSwipe && deltaX > 70) {
-      onClose();
+      handleClose();
     }
     else if (!isHorizontalSwipe && deltaY > 70 && scrollPos <= 5) {
-      onClose();
+      handleClose();
     }
 
     touchStartRef.current = null;
@@ -134,7 +145,7 @@ const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, onClose, isFav
 
   return (
     <div 
-      className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center sm:p-4 overflow-hidden"
+      className={`fixed inset-0 z-[100] flex items-end sm:items-center justify-center sm:p-4 overflow-hidden ${isClosing ? 'pointer-events-none' : ''}`}
       role="dialog"
       aria-modal="true"
       aria-labelledby="quick-view-title"
@@ -142,20 +153,20 @@ const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, onClose, isFav
       onTouchEnd={handleTouchEnd}
     >
       <div 
-        className="absolute inset-0 bg-gray-950/80 backdrop-blur-md" 
-        onClick={onClose}
+        className={`absolute inset-0 bg-gray-950/80 backdrop-blur-md transition-opacity duration-200 ease-out ${isClosing ? 'opacity-0' : 'animate-in fade-in opacity-100'}`} 
+        onClick={handleClose}
         aria-hidden="true"
       />
       
       <div 
         ref={modalRef}
-        className="relative w-full max-w-5xl h-[85vh] sm:h-auto sm:max-h-[85vh] bg-white dark:bg-gray-900 rounded-t-[2rem] sm:rounded-[2rem] shadow-2xl flex flex-col sm:grid sm:grid-cols-12 overflow-hidden border border-white/10"
+        className={`relative w-full max-w-5xl h-[88vh] sm:h-auto sm:max-h-[85vh] bg-white dark:bg-gray-900 rounded-t-[2rem] sm:rounded-[2rem] shadow-2xl flex flex-col sm:grid sm:grid-cols-12 overflow-hidden border border-white/10 transition-all duration-200 ease-out ${isClosing ? 'animate-out fade-out zoom-out-95 slide-out-to-bottom-[80%]' : 'animate-in fade-in zoom-in-95 slide-in-from-bottom-[50%]'}`}
       >
         <div className="absolute top-3 left-1/2 -translate-x-1/2 w-12 h-1 bg-gray-200 dark:bg-gray-800 rounded-full sm:hidden z-20" aria-hidden="true" />
 
         <button 
           ref={closeButtonRef}
-          onClick={onClose} 
+          onClick={handleClose} 
           className="absolute top-4 right-4 sm:top-5 sm:right-5 p-2 bg-white/90 dark:bg-gray-800/90 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100 backdrop-blur-md rounded-full z-[110] transition-all border border-gray-200 dark:border-gray-700 shadow-sm group flex items-center justify-center"
           aria-label="Close Preview"
         >
@@ -189,7 +200,7 @@ const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, onClose, isFav
         </div>
 
         <div className="col-span-7 flex flex-col h-full overflow-hidden bg-white dark:bg-gray-900">
-          <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-5 sm:p-8 no-scrollbar">
+          <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-3 sm:p-6 no-scrollbar">
             <div className="max-w-xl mx-auto sm:mx-0 space-y-4">
               
               <div className="flex flex-row items-center justify-between gap-2">
@@ -218,13 +229,13 @@ const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, onClose, isFav
               </div>
 
               <div className="space-y-2">
-                <h2 id="quick-view-title" className="text-lg sm:text-xl font-medium text-gray-900 dark:text-white leading-normal">
+                <h2 id="quick-view-title" className="text-base sm:text-xl font-medium text-gray-800 dark:text-white leading-normal">
                   {product.title}
                 </h2>
                 <div className="h-1 w-12 bg-orange-500 rounded-full" aria-hidden="true" />
               </div>
 
-              <div className="bg-blue-50 dark:bg-gray-950/40 rounded-2xl p-4 sm:p-6 border border-gray-100 dark:border-gray-800/60 relative overflow-hidden">
+              <div className="bg-blue-50 dark:bg-gray-950/40 rounded-2xl p-3 sm:p-6 border border-gray-100 dark:border-gray-800/60 relative overflow-hidden">
                 <div className="flex flex-row items-end justify-between gap-4 relative z-10">
                   <div className="space-y-1">
                     <span className={`text-[12px] font-bold uppercase tracking-wider flex items-center gap-1 ${qv.dealPrice.color}`}>
@@ -269,7 +280,7 @@ const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, onClose, isFav
           </div>
 
           <div className="p-4 sm:p-6 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 backdrop-blur-xl">
-            <div className="flex flex-row gap-3">
+            <div className="flex flex-row gap-2">
               <button 
                 onClick={onToggleFavorite} 
                 className={`flex-1 flex items-center justify-center rounded-xl border transition-all duration-300 active:scale-95 ${

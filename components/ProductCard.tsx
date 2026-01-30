@@ -80,17 +80,17 @@ const ProductCard: React.FC<ProductCardProps> = React.memo(({
       role="button"
       tabIndex={0}
       aria-label={`View details for ${product.title}`}
-      className={`group relative ${widthClass} bg-white dark:bg-gray-900 rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl hover:shadow-orange-500/15 transition-all duration-500 border border-gray-200 dark:border-gray-800 flex flex-col transform hover:-translate-y-2 cursor-pointer focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:outline-none`}
+      className={`group relative ${widthClass} bg-white dark:bg-gray-900 rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl hover:shadow-sky-400/15 transition-all duration-500 border border-gray-200 dark:border-gray-800 flex flex-col transform hover:-translate-y-2 cursor-pointer focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:outline-none`}
       onClick={() => onQuickView(product)}
       onKeyDown={handleKeyDown}
     >
       <div className="relative aspect-square overflow-hidden bg-white dark:bg-gray-800/30 flex items-center justify-center">
-        <div className="absolute inset-0 bg-gradient-to-tr from-orange-500/0 to-orange-500/0 group-hover:from-orange-500/5 group-hover:to-orange-500/10 transition-colors duration-500" />
+        <div className="absolute inset-0 bg-gradient-to-tr from-orange-500/0 to-orange-500/0 group-hover:from-orange-400/5 group-hover:to-pink-500/10 transition-colors duration-500" />
         
         <img
           src={imageUrl}
           alt={product.title}
-          className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:scale-110"
+          className="w-full h-full bg-white object-contain mix-blend-multiply dark:mix-blend-normal transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:scale-110"
           loading={priority ? "eager" : "lazy"}
           decoding="async"
           onError={(e) => {

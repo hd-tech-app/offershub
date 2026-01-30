@@ -14,6 +14,7 @@ interface ProductRowProps {
   onQuickView: (product: Product) => void;
   isLoading?: boolean;
   headerActions?: React.ReactNode;
+  isPriority?: boolean;
 }
 
 type SortOption = 'default' | 'priceAsc' | 'priceDesc' | 'rating' | 'reviews';
@@ -27,7 +28,8 @@ const ProductRow: React.FC<ProductRowProps> = ({
   onToggleFavorite, 
   onQuickView,
   isLoading = false,
-  headerActions
+  headerActions,
+  isPriority = false
 }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const gridScrollRef = useRef<HTMLDivElement>(null);
@@ -43,6 +45,7 @@ const ProductRow: React.FC<ProductRowProps> = ({
   
   // View All Modal State
   const [renderViewAll, setRenderViewAll] = useState(false);
+  const [isViewAllClosing, setIsViewAllClosing] = useState(false);
   
   // Gesture Refs
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
@@ -52,12 +55,17 @@ const ProductRow: React.FC<ProductRowProps> = ({
 
   const handleOpenViewAll = () => {
     setRenderViewAll(true);
+    setIsViewAllClosing(false);
     document.body.style.overflow = 'hidden';
   };
 
   const handleCloseViewAll = () => {
-    setRenderViewAll(false);
-    document.body.style.overflow = '';
+    setIsViewAllClosing(true);
+    setTimeout(() => {
+        setRenderViewAll(false);
+        setIsViewAllClosing(false);
+        document.body.style.overflow = '';
+    }, 200);
   };
 
   useEffect(() => {
@@ -345,6 +353,7 @@ const ProductRow: React.FC<ProductRowProps> = ({
                 onToggleFavorite={(e) => { e.preventDefault(); onToggleFavorite(product); }}
                 onQuickView={onQuickView}
                 showTopBadge={specialBadgeIndices.has(index)}
+                priority={isPriority && index < 6}
               />
             </div>
           ))
@@ -361,7 +370,7 @@ const ProductRow: React.FC<ProductRowProps> = ({
 
       {renderViewAll && (
         <div 
-          className="fixed inset-0 z-[100] bg-white dark:bg-gray-950 flex flex-col"
+          className={`fixed inset-0 z-[100] bg-white dark:bg-gray-950 flex flex-col transition-all duration-200 ease-out ${isViewAllClosing ? 'animate-out fade-out slide-out-to-bottom-[60%]' : 'animate-in fade-in slide-in-from-bottom-[50%]'}`}
           onTouchStart={onTouchStart}
           onTouchEnd={onTouchEnd}
           role="dialog"

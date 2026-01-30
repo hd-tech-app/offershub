@@ -198,6 +198,14 @@ const ContactUsPopup: React.FC<ContactUsPopupProps> = ({ isOpen, onClose }) => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     if (name === 'message' && value.length > 2000) return;
+
+    if (name === 'phone') {
+        // Restrict phone input to numbers only
+        const numeric = value.replace(/\D/g, '');
+        setFormData(prev => ({ ...prev, [name]: numeric }));
+        return;
+    }
+
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
@@ -283,7 +291,7 @@ const ContactUsPopup: React.FC<ContactUsPopupProps> = ({ isOpen, onClose }) => {
 
   return (
     <div 
-      className="fixed inset-0 z-[150] flex items-center justify-center p-8 pt-4 rounded-xl sm:p-0"
+      className="fixed inset-0 z-[150] flex items-center justify-center p-4 pt-4 rounded-xl sm:p-12"
       role="dialog"
       aria-modal="true"
       aria-labelledby="contact-title"
@@ -399,6 +407,8 @@ const ContactUsPopup: React.FC<ContactUsPopupProps> = ({ isOpen, onClose }) => {
                       id="phone"
                       name="phone"
                       type="tel"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
                       required
                       autoComplete="tel"
                       placeholder="98XX5 4XXX1"
