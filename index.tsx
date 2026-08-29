@@ -14,3 +14,9 @@ root.render(
     <App />
   </React.StrictMode>
 );
+
+const router = createBrowserRouter([
+  { path: "/", element: <Root /> }
+], {
+  basename: "/offershub", // 👈 ADD THIS CONFIGURATION OBJECT
+});
